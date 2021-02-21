@@ -5,8 +5,11 @@ num_ans = 0
 ans = []
 title = ""
 w = []
+raw_woerter = []
+
 
 def html_gen(woerter, loesungen):
+    global ans, raw_woerter
     erster_satz = ""
     i=0
     while i<len(woerter):
@@ -35,13 +38,20 @@ def html_gen(woerter, loesungen):
             <h3>{{title}}</h3>
                 <form action="/ergebnis" method="POST">
                     <p class="ctest">
-    """ + erster_satz
+    """ + erster_satz + woerter[i] + " "
     j=1
+    geradzahlig=True
+    i += 1
     while i < len(woerter):
         #print(woerter[i])
-        html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j)
+        if geradzahlig and len(raw_woerter[i])>=3:
+            html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j) + " "
+            j += 1
+        else:
+            html_str += woerter[i] + " "
         i += 1
-        j += 1
+        geradzahlig = not geradzahlig
+        
     html_str += "</p>"
     html_str += r"""
     <p class="ctest">Score: {{rchtg}}/{{nans}}</p>
@@ -55,7 +65,8 @@ def html_gen(woerter, loesungen):
     f.close()
 
 def text_proc(raw):
-    woerter = raw.split()
+    global raw_woerter
+    raw_woerter = raw.split()
     test_woerter = []
     loesungen = []
     #print(woerter)
@@ -64,8 +75,8 @@ def text_proc(raw):
     erster=True
     geradzahlig=True
     ant_num = 0
-    while i<len(woerter):
-        wort = woerter[i]
+    while i<len(raw_woerter):
+        wort = raw_woerter[i]
         # erster Satz
         if erster:
             test_woerter.append(wort)
@@ -122,13 +133,15 @@ def my_form_post():
     for i in range(1, num_ans):
         
         answers.append(request.form['ctest{}'.format(i)])
-        if request.form['ctest{}'.format(i)] == ans[i]:
-            berichte += ("richtig: {}\n".format(ans[i]))
+        if request.form['ctest{}'.format(i)] == ans[i-1]:
+            berichte += ("richtig: {}\n".format(ans[i-1]))
             richtige += 1
         else:
             berichte += ("falsch: {} != {}\n".format(request.form['ctest{}'.format(i)], ans[i]))
     req_data = request.get_json()
     print(answers)
+    print(ans)
+    #print(berichte)
     page = render_template('test.html', title=title, main_text=w, nans=num_ans, rchtg=richtige)
     
     return page
