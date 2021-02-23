@@ -45,10 +45,11 @@ def html_gen(woerter, loesungen):
     geradzahlig=True
     i += 1
     while i < len(woerter):
-        print(woerter[i])
         if geradzahlig and len(raw_woerter[i])>1 and '.' not in raw_woerter[i]:
-            print(j)
-            html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j) + " "
+            if ',' in raw_woerter[i]:
+                html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j) + ", "
+            else:
+                html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j) + " "
             j += 1
 
         else:
@@ -96,8 +97,14 @@ def text_proc(raw):
                 test_woerter.append(wort)
                 
             else:
-                test_woerter.append(wort[:math.ceil(len(wort)/2)])
-                loesungen.append(wort[math.ceil(len(wort)/2):])
+                if ',' in wort:
+                    test_woerter.append(wort[:math.floor(float(len(wort.replace(',', '')))/2)])
+                    loesungen.append(wort[math.floor(float(len(wort.replace(',', '')))/2):])
+                else:
+                    print(len(wort))
+                    print(math.ceil(float(len(wort))/2))
+                    test_woerter.append(wort[:math.floor(float(len(wort))/2)])
+                    loesungen.append(wort[math.floor(float(len(wort))/2):])
                 ant_num+=1
             geradzahlig = not geradzahlig #abwechseln
         i += 1
