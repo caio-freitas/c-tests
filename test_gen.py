@@ -1,12 +1,14 @@
 from flask import Flask, request, render_template
-
+import math
+import re
 app = Flask(__name__)
+
 num_ans = 0
 ans = []
 title = ""
 w = []
 raw_woerter = []
-
+raw_text = ""
 
 def html_gen(woerter, loesungen):
     global ans, raw_woerter
@@ -43,10 +45,12 @@ def html_gen(woerter, loesungen):
     geradzahlig=True
     i += 1
     while i < len(woerter):
-        #print(woerter[i])
-        if geradzahlig and len(raw_woerter[i])>=3:
+        print(woerter[i])
+        if geradzahlig and len(raw_woerter[i])>1 and '.' not in raw_woerter[i]:
+            print(j)
             html_str += woerter[i] + '<input name="ctest{}" style="width: 12px;">'.format(j) + " "
             j += 1
+
         else:
             html_str += woerter[i] + " "
         i += 1
@@ -58,6 +62,7 @@ def html_gen(woerter, loesungen):
                 <p>&nbsp;</p>
                 </p>
                 <input type="submit" name="Ergebnis"> 
+                <p class="answer">{{voller_text}}</p>
             </form> 
     """
     f = open("templates/test.html", "w")
@@ -67,6 +72,7 @@ def html_gen(woerter, loesungen):
 def text_proc(raw):
     global raw_woerter
     raw_woerter = raw.split()
+    print(raw_woerter)
     test_woerter = []
     loesungen = []
     #print(woerter)
@@ -86,13 +92,13 @@ def text_proc(raw):
                 erster=False
 
         else:
-            if geradzahlig or len(wort)<3:
+            if geradzahlig or '.' in wort or len(wort)<=1:
                 test_woerter.append(wort)
+                
             else:
-                if len(wort)>3:
-                    test_woerter.append(wort[:len(wort)-3])
-                    loesungen.append(wort[len(wort)-3:])
-                    ant_num+=1
+                test_woerter.append(wort[:math.ceil(len(wort)/2)])
+                loesungen.append(wort[math.ceil(len(wort)/2):])
+                ant_num+=1
             geradzahlig = not geradzahlig #abwechseln
         i += 1
 
@@ -111,6 +117,7 @@ def input():
 
 @app.route('/', methods=['POST'])
 def input_post():
+    global raw_text
     global num_ans, ans, w, title
     title = request.form['title']
     verarbeitet_title = title.title()
@@ -120,7 +127,7 @@ def input_post():
     num_ans = na
     ans = l
     html_gen(w, l)
-    page = render_template('test.html', title=title, main_text=w, nans=na, rchtg="____")
+    page = render_template('test.html', title=title, main_text=w, nans=na, rchtg="____", voller_text="")
     return page
 
 @app.route('/ergebnis', methods=['POST'])
@@ -142,6 +149,6 @@ def my_form_post():
     print(answers)
     print(ans)
     #print(berichte)
-    page = render_template('test.html', title=title, main_text=w, nans=num_ans, rchtg=richtige)
+    page = render_template('test.html', title=title, main_text=w, nans=num_ans, rchtg=richtige, voller_text=raw_text)
     
     return page
