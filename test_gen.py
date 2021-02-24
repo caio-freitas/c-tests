@@ -62,7 +62,7 @@ def html_gen(woerter, loesungen):
     <p class="ctest">Score: {{rchtg}}/{{nans}}</p>
                 <p>&nbsp;</p>
                 </p>
-                <input type="submit" name="Ergebnis"> 
+                <button name="Ergebnis">Ergebnis</button>
                 <p class="answer">{{voller_text}}</p>
             </form> 
     """
@@ -101,8 +101,6 @@ def text_proc(raw):
                     test_woerter.append(wort[:math.floor(float(len(wort.replace(',', '')))/2)])
                     loesungen.append(wort[math.floor(float(len(wort.replace(',', '')))/2):])
                 else:
-                    print(len(wort))
-                    print(math.ceil(float(len(wort))/2))
                     test_woerter.append(wort[:math.floor(float(len(wort))/2)])
                     loesungen.append(wort[math.floor(float(len(wort))/2):])
                 ant_num+=1
@@ -155,7 +153,6 @@ def my_form_post():
     req_data = request.get_json()
     print(answers)
     print(ans)
-    #print(berichte)
     page = render_template('test.html', title=title, main_text=w, nans=num_ans, rchtg=richtige, voller_text=raw_text)
     
     return page
